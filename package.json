@@ -45,7 +45,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "proxy": "https://13.202.144.38:8080",
+  }
   "homepage": "https://ravagerahul.github.io/ailabs"
 }
