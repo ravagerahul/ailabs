@@ -70,8 +70,7 @@ export default function SignInCard(props) {
     const response = await fetch('https://13.202.144.38:8443/session/api/v1/user/verify', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-            'Cookie' : 'SESSION=N2UyMDg0MWEtNzRiZi00MzMyLWJkYjUtMDY5MDg2OTQzZWY3'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(formData)
       });
