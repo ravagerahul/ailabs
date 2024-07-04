@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/ailabs/static/css/main.db67d36b.css",
-    "main.js": "/ailabs/static/js/main.5c4f1646.js",
+    "main.js": "/ailabs/static/js/main.e28387ed.js",
     "static/js/453.85c5ebc3.chunk.js": "/ailabs/static/js/453.85c5ebc3.chunk.js",
     "static/media/logo.svg": "/ailabs/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
     "index.html": "/ailabs/index.html",
     "main.db67d36b.css.map": "/ailabs/static/css/main.db67d36b.css.map",
-    "main.5c4f1646.js.map": "/ailabs/static/js/main.5c4f1646.js.map",
+    "main.e28387ed.js.map": "/ailabs/static/js/main.e28387ed.js.map",
     "453.85c5ebc3.chunk.js.map": "/ailabs/static/js/453.85c5ebc3.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.db67d36b.css",
-    "static/js/main.5c4f1646.js"
+    "static/js/main.e28387ed.js"
   ]
 }
