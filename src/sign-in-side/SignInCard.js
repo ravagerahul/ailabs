@@ -15,6 +15,7 @@ import { styled } from "@mui/material/styles";
 import ForgotPassword from "./ForgotPassword";
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from "./CustomIcons";
 import {useNavigate} from 'react-router-dom';
+import { BASE_URL } from "../config";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -67,7 +68,8 @@ export default function SignInCard(props) {
       email: data.get("code"),
       password: data.get("password"),
     });
-    const response = await fetch('https://13.202.144.38:8443/session/api/v1/user/verify', {
+    console.log("BASEURL : " + BASE_URL )
+    const response = await fetch(BASE_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
