@@ -15,7 +15,7 @@ import { styled } from "@mui/material/styles";
 import ForgotPassword from "./ForgotPassword";
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from "./CustomIcons";
 import {useNavigate} from 'react-router-dom';
-import { BASE_URL } from "../config";
+import { SIGNIN_URL } from "../config";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -68,23 +68,34 @@ export default function SignInCard(props) {
       email: data.get("code"),
       password: data.get("password"),
     });
-    console.log("BASEURL : " + BASE_URL )
-    const response = await fetch(BASE_URL, {
+    console.log("BASEURL : " + SIGNIN_URL )
+    const response = await fetch(SIGNIN_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
+        credentials: 'include'
       });
 
       
       if (response.ok) {
         const data1 = await response.json();
       console.log(data1.status);
-      if(data1.status)
+      if(data1 && data1.status)
         {
+          const response1 = await fetch("https://theailabs.live/session/api/v1/Meta",{
+            method: 'GET'
+          });
+          const data1 = await response1.json();
+          console.log("data from meta   " + data1);
+          localStorage.setItem('apiData',JSON.stringify(data1));
+          console.log("Data saved in local storage");
+          
           console.log("status == true")
           navigate('/dashboard');
+          console.log("META data")
+      
         }
         else{
           console.log("status == false")
@@ -92,6 +103,10 @@ export default function SignInCard(props) {
       } else {
         console.error('Failed to fetch', response.statusText);
       }
+
+      //META DATA FETCH 
+
+      
    
     
 
