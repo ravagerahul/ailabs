@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Typography } from "@mui/material";
 import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
@@ -346,42 +346,82 @@ const MenuProps = {
   },
 };
 
-const batchNames = [
-  "Class 1 A",
-  "Class 1 B",
-  "Class 2 A",
-  "Class 2 B",
-  "Class 3 A",
-  "Class 3 B",
-  "Class 4 A",
-  "Class 4 B",
-  "Class 5 A",
-  "Class 5 B",
-  "Class 6 A",
-  "Class 6 B",
-  "Class 7 A",
-  "Class 7 B",
-  "Class 8 A",
-  "Class 8 B",
-  "Class 9 A",
-  "Class 9 B",
-  "Class 10 A",
-  "Class 10 B",
-];
 
 const Students = () => {
   // Your component logic goes here
+  const [file,setFile] = useState(null);
+  const [batchNames, setBatchNames] = useState([]);
+  const [selectedBatch, setSelectedBatch] = useState([]);
+
+  useEffect(() => {
+    const localStorageData = JSON.parse(localStorage.getItem('apiData'));
+    const sett=[];
+    for (const obj of localStorageData.batchList) {
+      sett.push(obj.code)
+    }
+    setBatchNames(sett);
+  });
+  const handleChangeBatch = (event) => {
+    const { value } = event.target;
+    setSelectedBatch(Array.isArray(value) ? value : [value]);
+  };  
+const handleFileChange = (event) =>{
+  setFile(event.target.files[0]);
+}
+
+const handleSubmit = async (event) => {
+  event.preventDefault();
+  if (!file) {
+    alert('Please select a file first!');
+    return;
+  }
+  
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('batchId',1);
+
+  console.log("STARTING HITTING API REQUEST")
+  try {
+    const response = await fetch('https://theailabs.live/storage/uploadStudentList', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+      console.log('File uploaded successfully', data);
+    console.log('File uploaded successfully');
+  } catch (error) {
+    console.error('Error uploading file', error);
+  }
+};
   const [batchName, setBatchName] = React.useState([]);
 
-  const handleChangeBatch = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setBatchName(
-      // On autofill we get a stringified value.
-      typeof value === "string" ? value.split(",") : value
-    );
-  };
+   const downloadSampleStudent = async (event) =>{
+  //   const response = await fetch('https://theailabs.live/storage/downloadFile?type=STUDENT',{
+  //     method: 'GET'
+  //   });
+  //   console.log("RESPONSE download sample student   ", response);
+  // }
+  console.log("starting  download")
+  fetch('https://theailabs.live/storage/downloadFile?type=STUDENT')
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'downloadedFile.pdf'); // Suggested filename
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      });
+
+      console.log("check download")
+    }
+
+ 
 
   return (
     <Grid container spacing={3}>
@@ -420,6 +460,7 @@ const Students = () => {
                     }}
                     variant="outlined"
                     component="label"
+                    onClick={downloadSampleStudent}
                   >
                     Download Samle CSV
                   </Button>
@@ -438,7 +479,7 @@ const Students = () => {
                         <Select
                           labelId="demo-multiple-checkbox-label"
                           id="demo-multiple-checkbox"
-                          value={batchName}
+                          value={selectedBatch}
                           onChange={handleChangeBatch}
                           input={<OutlinedInput label="Batch" />}
                           renderValue={(selected) => selected.join(", ")}
@@ -461,8 +502,9 @@ const Students = () => {
                       component="label"
                       style={{ background: "#4caf50" }}
                     >
-                      Upload File
-                      <input type="file" hidden />
+                      Upload File1111
+                      <input type="file" onChange={handleFileChange} />
+                      {file && <button onClick={handleSubmit}>Submit</button>}
                     </Button>
                   </FormControl>
                 </div>
