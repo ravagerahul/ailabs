@@ -3,18 +3,18 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { Card as MuiCard } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
-import Divider from "@mui/material/Divider";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 import ForgotPassword from "./ForgotPassword";
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from "./CustomIcons";
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { SIGNIN_URL } from "../config";
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -34,102 +34,91 @@ const Card = styled(MuiCard)(({ theme }) => ({
   },
 }));
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 export default function SignInCard(props) {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
-  const [open, setOpen] = React.useState(false);
   const [formData, setFormData] = React.useState({
-    code: '',
-    password: '',
+    code: "",
+    password: "",
   });
+  const [showError, setShowError] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState("");
+  const [showSuccess, setShowSuccess] = React.useState(false); // State for success message
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
-  };  
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("code"),
-      password: data.get("password"),
-    });
-    console.log("BASEURL : " + SIGNIN_URL )
-    const response = await fetch(SIGNIN_URL, {
-        method: 'POST',
+
+    if (!validateInputs()) {
+      return;
+    }
+
+    try {
+      const response = await fetch(SIGNIN_URL, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-        credentials: 'include'
+        credentials: "include",
       });
 
-      
       if (response.ok) {
-        const data1 = await response.json();
-      console.log(data1.status);
-      if(data1 && data1.status)
-        {
-          const response1 = await fetch("https://theailabs.live/session/api/v1/Meta",{
-            method: 'GET'
-          });
-          const data1 = await response1.json();
-          console.log("data from meta   " + data1);
-          localStorage.setItem('apiData',JSON.stringify(data1));
-          console.log("Data saved in local storage");
-          
-          console.log("status == true")
-          navigate('/dashboard');
-          console.log("META data")
-      
-        }
-        else{
-          console.log("status == false")
+        const data = await response.json();
+        console.log(data);
+        if (data && data.status) {
+          // Successful login logic
+          setShowSuccess(true); // Show success message
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 2000); // Navigate after 2 seconds
+        } else {
+          // Handle unsuccessful login
+          setShowError(true);
+          setErrorMessage("Invalid credentials. Please try again.");
         }
       } else {
-        console.error('Failed to fetch', response.statusText);
+        setShowError(true);
+        setErrorMessage("Failed to sign in. Please try again later.");
+        console.error("Failed to fetch", response.statusText);
       }
-
-      //META DATA FETCH 
-
-      
-   
-    
-
+    } catch (error) {
+      setShowError(true);
+      setErrorMessage("An error occurred. Please try again later.");
+      console.error("Error occurred while signing in:", error);
+    }
   };
 
   const validateInputs = () => {
-    const email = document.getElementById("email");
-    const password = document.getElementById("password");
-
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+    // Validate email (code)
+    if (!formData.code.trim()) {
       setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
+      setEmailErrorMessage("Username is required.");
       isValid = false;
     } else {
       setEmailError(false);
       setEmailErrorMessage("");
     }
 
-    if (!password.value || password.value.length < 6) {
+    // Validate password
+    if (!formData.password.trim()) {
       setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
+      setPasswordErrorMessage("Password is required.");
       isValid = false;
     } else {
       setPasswordError(false);
@@ -137,6 +126,11 @@ export default function SignInCard(props) {
     }
 
     return isValid;
+  };
+
+  const handleSnackbarClose = () => {
+    setShowError(false);
+    setShowSuccess(false); // Close success message as well
   };
 
   return (
@@ -163,40 +157,24 @@ export default function SignInCard(props) {
         }}
       >
         <FormControl>
-          <FormLabel htmlFor="email">Username</FormLabel>
+          <FormLabel htmlFor="username">Username</FormLabel>
           <TextField
             error={emailError}
             helperText={emailErrorMessage}
             id="username"
             name="code"
-            placeholder="username"
+            placeholder="Username"
             autoFocus
             required
             fullWidth
             variant="outlined"
             color={emailError ? "error" : "primary"}
-            sx={{ ariaLabel: "email" }}
             value={formData.code}
-          onChange={handleChange}
+            onChange={handleChange}
           />
         </FormControl>
         <FormControl>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <FormLabel htmlFor="password">Password</FormLabel>
-            {/* <Link
-              component="button"
-              onClick={handleClickOpen}
-              variant="body2"
-              sx={{ alignSelf: "baseline" }}
-            >
-              Forgot your password?
-            </Link> */}
-          </Box>
+          <FormLabel htmlFor="password">Password</FormLabel>
           <TextField
             error={passwordError}
             helperText={passwordErrorMessage}
@@ -211,51 +189,29 @@ export default function SignInCard(props) {
             variant="outlined"
             color={passwordError ? "error" : "primary"}
             value={formData.password}
-          onChange={handleChange}
+            onChange={handleChange}
           />
         </FormControl>
         <FormControlLabel
           control={<Checkbox value="remember" color="primary" />}
           label="Remember me"
         />
-        <ForgotPassword open={open} handleClose={handleClose} />
-
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-        >
+        <Button type="submit" fullWidth variant="contained">
           Sign in
         </Button>
-
-        {/* <Link variant="body2" sx={{ alignSelf: "center" }}>
-          Don&apos;t have an account? Sign up
-        </Link> */}
       </Box>
-      {/* <Divider>or</Divider>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Button
-          type="submit"
-          fullWidth
-          variant="outlined"
-          color="secondary"
-          onClick={() => alert("Sign in with Google")}
-          startIcon={<GoogleIcon />}
+      <Snackbar
+        open={showError || showSuccess} // Show for both error and success
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={showError ? "error" : "success"} // Dynamic severity based on showError
         >
-          Sign in with Google
-        </Button>
-        <Button
-          type="submit"
-          fullWidth
-          variant="outlined"
-          color="secondary"
-          onClick={() => alert("Sign in with Facebook")}
-          startIcon={<FacebookIcon />}
-        >
-          Sign in with Facebook
-        </Button>
-      </Box> */}
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </Card>
   );
 }
-
