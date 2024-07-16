@@ -80,6 +80,14 @@ export default function SignInCard(props) {
         const data = await response.json();
         console.log(data);
         if (data && data.status) {
+          const response1 = await fetch("https://theailabs.live/session/api/v1/Meta",{
+            method: 'GET'
+          });
+          const data1 = await response1.json();
+          console.log("data from meta   " + data1);
+          localStorage.setItem('apiData',JSON.stringify(data1));
+          
+          console.log("Data saved in local storage");
           // Successful login logic
           setShowSuccess(true); // Show success message
           setTimeout(() => {

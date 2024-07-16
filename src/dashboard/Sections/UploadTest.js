@@ -1,19 +1,27 @@
-import React from "react";
-import { Typography } from "@mui/material";
-import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
-import StudentDetails from "./Home/StudentDetails";
-import Paper from "@mui/material/Paper";
-import { Box, ThemeProvider } from "@mui/material";
-
-import OutlinedInput from "@mui/material/OutlinedInput";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import ListItemText from "@mui/material/ListItemText";
-import Select from "@mui/material/Select";
-import Checkbox from "@mui/material/Checkbox";
-import Button from "@mui/material/Button";
+import React, { useState } from "react";
+import {
+  Typography,
+  Divider,
+  Grid,
+  Paper,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  ListItemText,
+  Select,
+  Checkbox,
+  Button,
+  OutlinedInput,
+  Box,
+  CircularProgress,
+  Snackbar,
+  Alert,
+  TextField,
+} from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -27,76 +35,75 @@ const MenuProps = {
 };
 
 const batchNames = [
-  "Class 1 A",
-  "Class 1 B",
-  "Class 2 A",
-  "Class 2 B",
-  "Class 3 A",
-  "Class 3 B",
-  "Class 4 A",
-  "Class 4 B",
-  "Class 5 A",
-  "Class 5 B",
-  "Class 6 A",
-  "Class 6 B",
-  "Class 7 A",
-  "Class 7 B",
-  "Class 8 A",
-  "Class 8 B",
-  "Class 9 A",
-  "Class 9 B",
-  "Class 10 A",
-  "Class 10 B",
+  "B1",
+  "B2",
+  "B3" // Example batchId, replace with actual batchIds
+  // Other batchIds
 ];
-const subjectNames = [
-  "Maths",
-  "Science",
-  "English",
-  "Hindi",
-  "Social Science",
-  "Computer Science",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "History",
-  "Geography",
-  "Civics",
-  "Economics",
-  "Physical Education",
-  "General Knowledge",
-  "Moral Science",
-  "Drawing",
-  "Craft",
-  "Music",
-  "Dance",
-  "Yoga",
-];
+
 const UploadTest = () => {
-  // Your component logic goes here
-  const [batchName, setBatchName] = React.useState([]);
+  const [batchName, setBatchName] = useState([]);
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const handleChangeBatch = (event) => {
     const {
       target: { value },
     } = event;
-    setBatchName(
-      // On autofill we get a stringified value.
-      typeof value === "string" ? value.split(",") : value
-    );
+    setBatchName(typeof value === "string" ? value.split(",") : value);
   };
 
-  // Your component logic goes here
-  const [subjectName, setSubjectName] = React.useState([]);
-
-  const handleChangeSubject = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setSubjectName(
-      // On autofill we get a stringified value.
-      typeof value === "string" ? value.split(",") : value
-    );
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
   };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!file) {
+      alert("Please select a file first!");
+      return;
+    }
+
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("batchId", batchName.join(","));
+    formData.append("testDate", selectedDate ? selectedDate.toISOString() : "");
+
+    try {
+      const response = await fetch(
+        "https://theailabs.live/storage/uploadTest",
+        {
+          method: "POST",
+          body: formData,
+          credentials: 'include', // to include cookies if needed
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      setSuccessMessage("File uploaded successfully");
+    } catch (error) {
+      console.error("Error uploading file", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSuccessMessage("");
+    window.location.reload();
+  };
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
@@ -105,9 +112,27 @@ const UploadTest = () => {
             p: 2,
             display: "flex",
             flexDirection: "column",
-            // height: 240,
+            position: "relative",
           }}
         >
+          {loading && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(255, 255, 255, 0.7)",
+                zIndex: 1,
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          )}
           <div>
             <Grid container spacing={3}>
               <Grid item xs={12}>
@@ -123,7 +148,6 @@ const UploadTest = () => {
                     justifyContent: "end",
                   }}
                 >
-                  {" "}
                   <Button
                     style={{
                       marginLeft: "16px",
@@ -134,7 +158,7 @@ const UploadTest = () => {
                     variant="outlined"
                     component="label"
                   >
-                    Download Samle CSV
+                    Download Sample CSV
                   </Button>
                 </div>
                 <Divider style={{ marginTop: "0px", marginBottom: "18px" }} />
@@ -160,31 +184,20 @@ const UploadTest = () => {
                     ))}
                   </Select>
                 </FormControl>
-                <FormControl
-                  sx={{ m: 1, width: 300, marginLeft: "16px" }}
-                  size="small"
-                >
-                  <InputLabel id="demo-multiple-checkbox-label">
-                    Subjects
-                  </InputLabel>
-                  <Select
-                    labelId="demo-multiple-checkbox-label"
-                    id="demo-multiple-checkbox"
-                    multiple
-                    value={subjectName}
-                    onChange={handleChangeSubject}
-                    input={<OutlinedInput label="Subjects" />}
-                    renderValue={(selected) => selected.join(", ")}
-                    MenuProps={MenuProps}
-                  >
-                    {subjectNames.map((name) => (
-                      <MenuItem key={name} value={name}>
-                        <Checkbox checked={subjectName.indexOf(name) > -1} />
-                        <ListItemText primary={name} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <div style={{ marginTop: "16px" }}>
+                  <FormControl sx={{ m: 1 }}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        label="Select Date"
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        renderInput={(params) => (
+                          <TextField {...params} fullWidth />
+                        )}
+                      />
+                    </LocalizationProvider>
+                  </FormControl>
+                </div>
                 <div style={{ marginTop: "16px" }}>
                   <FormControl sx={{ m: 1 }}>
                     <Button
@@ -193,15 +206,35 @@ const UploadTest = () => {
                       style={{ background: "#4caf50" }}
                     >
                       Upload File
-                      <input type="file" hidden />
+                      <input type="file" onChange={handleFileChange} hidden />
                     </Button>
                   </FormControl>
+                  {file && (
+                    <FormControl sx={{ m: 1 }}>
+                      <Button variant="contained" onClick={handleSubmit}>
+                        Submit
+                      </Button>
+                    </FormControl>
+                  )}
                 </div>
               </Grid>
             </Grid>
           </div>
         </Paper>
       </Grid>
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Grid>
   );
 };

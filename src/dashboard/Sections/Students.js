@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Typography } from "@mui/material";
+import { Typography, Snackbar, Alert } from "@mui/material";
 import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
-import { Box, ThemeProvider } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
@@ -28,14 +28,20 @@ const Students = () => {
   const [file, setFile] = useState(null);
   const [batchNames, setBatchNames] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
-    const localStorageData = JSON.parse(localStorage.getItem('apiData'));
-    const sett = [];
-    for (const obj of localStorageData.batchList) {
-      sett.push(obj.code);
+    const localStorageData = localStorage.getItem('apiData');
+    console.log('LocalStorage apiData:', localStorageData);
+    const parsedData = JSON.parse(localStorageData);
+    if (parsedData && parsedData.batchList) {
+      const sett = parsedData.batchList.map(obj => obj.code);
+      setBatchNames(sett);
+      if (sett.length > 0) {
+        setSelectedBatch([sett[0]]); // Initialize with the first batch if available
+      }
     }
-    setBatchNames(sett);
   }, []);
 
   const handleChangeBatch = (event) => {
@@ -54,6 +60,8 @@ const Students = () => {
       return;
     }
 
+    setLoading(true);
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('batchId', 1);
@@ -70,8 +78,11 @@ const Students = () => {
       }
       const data = await response.json();
       console.log('File uploaded successfully', data);
+      setSuccessMessage('File uploaded successfully');
     } catch (error) {
       console.error('Error uploading file', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,6 +101,11 @@ const Students = () => {
       });
   };
 
+  const handleCloseSnackbar = () => {
+    setSuccessMessage("");
+    window.location.reload();
+  };
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
@@ -98,8 +114,27 @@ const Students = () => {
             p: 2,
             display: "flex",
             flexDirection: "column",
+            position: "relative",
           }}
         >
+          {loading && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(255, 255, 255, 0.7)",
+                zIndex: 1,
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          )}
           <div>
             <Grid container spacing={3}>
               <Grid item xs={12}>
@@ -181,6 +216,15 @@ const Students = () => {
           </div>
         </Paper>
       </Grid>
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Grid>
   );
 };

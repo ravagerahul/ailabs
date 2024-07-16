@@ -1,7 +1,22 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "react-data-grid/lib/styles.css";
-
 import DataGrid from "react-data-grid";
+import { TextField, Select, MenuItem, InputLabel, FormControl, Grid, Paper, Typography } from "@mui/material";
+import { styled } from "@mui/system";
+import axios from "axios";
+
+const Container = styled(Paper)({
+  padding: '20px',
+  marginTop: '20px',
+});
+
+const Header = styled(Typography)({
+  marginBottom: '20px',
+});
+
+const SearchField = styled(TextField)({
+  marginRight: '20px',
+});
 
 const columns = [
   { key: "id", name: "ID" },
@@ -16,203 +31,86 @@ const columns = [
   { key: "guessWork", name: "Guess Work" },
 ];
 
-const rows = [
-  {
-    id: 1,
-    name: "John Doe",
-    batch: "Class 1 A",
-    physics: 80,
-    chemistry: 90,
-    maths: 70,
-    sillyMistakes: 10,
-    timeManagement: 20,
-    concentrationLaps: 30,
-    guessWork: 40,
-  },
-  {
-    id: 2,
-    name: "Rahul Sharma",
-    batch: "Class 1 A",
-    physics: 85,
-    chemistry: 95,
-    maths: 75,
-    sillyMistakes: 15,
-    timeManagement: 25,
-    concentrationLaps: 35,
-    guessWork: 70,
-  },
-  {
-    id: 3,
-    name: "Raj Dubey",
-    batch: "Class 1 A",
-    physics: 90,
-    chemistry: 80,
-    maths: 85,
-    sillyMistakes: 20,
-    timeManagement: 30,
-    concentrationLaps: 40,
-    guessWork: 10,
-  },
-  {
-    id: 4,
-    name: "Rohit Sharma",
-    batch: "Class 1 A",
-    physics: 75,
-    chemistry: 85,
-    maths: 65,
-    sillyMistakes: 25,
-    timeManagement: 35,
-    concentrationLaps: 45,
-    guessWork: 20,
-  },
-  {
-    id: 5,
-    name: "Rohan Singh",
-    batch: "Class 1 A",
-    physics: 70,
-    chemistry: 80,
-    maths: 60,
-    sillyMistakes: 30,
-    timeManagement: 40,
-    concentrationLaps: 50,
-    guessWork: 30,
-  },
-  {
-    id: 6,
-    name: "Rajesh Kumar",
-    batch: "Class 1 A",
-    physics: 65,
-    chemistry: 75,
-    maths: 55,
-    sillyMistakes: 35,
-    timeManagement: 45,
-    concentrationLaps: 55,
-    guessWork: 0,
-  },
-  {
-    id: 7,
-    name: "Rajat Sharma",
-    batch: "Class 1 A",
-    physics: 60,
-    chemistry: 70,
-    maths: 50,
-    sillyMistakes: 40,
-    timeManagement: 50,
-    concentrationLaps: 60,
-    guessWork: 0,
-  },
-  {
-    id: 8,
-    name: "Rahul Dubey",
-    batch: "Class 1 A",
-    physics: 55,
-    chemistry: 65,
-    maths: 45,
-    sillyMistakes: 45,
-    timeManagement: 55,
-    concentrationLaps: 65,
-    guessWork: 0,
-  },
-  {
-    id: 9,
-    name: "Rajat Singh",
-    batch: "Class 1 A",
-    physics: 50,
-    chemistry: 60,
-    maths: 40,
-    sillyMistakes: 50,
-    timeManagement: 60,
-    concentrationLaps: 70,
-    guessWork: 0,
-  },
-  {
-    id: 10,
-    name: "Rohit Dubey",
-    batch: "Class 1 A",
-    physics: 45,
-    chemistry: 55,
-    maths: 35,
-    sillyMistakes: 55,
-    timeManagement: 65,
-    concentrationLaps: 75,
-    guessWork: 0,
-  },
-  {
-    id: 11,
-    name: "Rohan Sharma",
-    batch: "Class 1 A",
-    physics: 40,
-    chemistry: 50,
-    maths: 30,
-    sillyMistakes: 60,
-    timeManagement: 70,
-    concentrationLaps: 80,
-    guessWork: 0,
-  },
-  {
-    id: 12,
-    name: "Rajesh Singh",
-    batch: "Class 1 A",
-    physics: 35,
-    chemistry: 45,
-    maths: 25,
-    sillyMistakes: 65,
-    timeManagement: 75,
-    concentrationLaps: 85,
-    guessWork: 0,
-  },
-  {
-    id: 13,
-    name: "Rajat Dubey",
-    batch: "Class 1 A",
-    physics: 30,
-    chemistry: 40,
-    maths: 20,
-    sillyMistakes: 70,
-    timeManagement: 80,
-    concentrationLaps: 90,
-    guessWork: 0,
-  },
-  {
-    id: 14,
-    name: "Rahul Singh",
-    batch: "Class 1 A",
-    physics: 25,
-    chemistry: 35,
-    maths: 15,
-    sillyMistakes: 75,
-    timeManagement: 85,
-    concentrationLaps: 95,
-    guessWork: 0,
-  },
-  {
-    id: 15,
-    name: "Rohit Kumar",
-    batch: "Class 1 A",
-    physics: 20,
-    chemistry: 30,
-    maths: 10,
-    sillyMistakes: 80,
-    timeManagement: 90,
-    concentrationLaps: 100,
-    guessWork: 0,
-  },
-  {
-    id: 16,
-    name: "Rohan Dubey",
-    batch: "Class 1 A",
-    physics: 15,
-    chemistry: 25,
-    maths: 5,
-    sillyMistakes: 85,
-    timeManagement: 95,
-    concentrationLaps: 105,
-    guessWork: 0,
-  },
-];
-
 function AllStudentsDataGrid() {
-  return <DataGrid columns={columns} rows={rows} />;
+  const [searchText, setSearchText] = useState('');
+  const [selectedBatch, setSelectedBatch] = useState('');
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    // Fetch data from API
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('https://theailabs.live/session/api/v1/student/getStudentListByBatch?batchId=3');
+        // Assuming response.data is an array of students
+        if (Array.isArray(response.data)) {
+          // Transform the response data if necessary to match the columns structure
+          const transformedData = response.data.map(student => ({
+            id: student.id,
+            name: student.name,
+            batch: student.batch.name, // Assuming batch is an object with a 'name' property
+            physics: student.physics,
+            chemistry: student.chemistry,
+            maths: student.maths,
+            sillyMistakes: student.sillyMistakes,
+            timeManagement: student.timeManagement,
+            concentrationLaps: student.concentrationLaps,
+            guessWork: student.guessWork
+          }));
+          setRows(transformedData);
+        } else {
+          setRows([]);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        // Handle error state, such as setting an empty array or showing an error message
+        setRows([]);
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency array ensures useEffect runs once on component mount
+
+  const filteredRows = rows.filter(row => {
+    return (
+      (searchText === '' || row.name.toLowerCase().includes(searchText.toLowerCase()) || row.id.toString().includes(searchText)) &&
+      (selectedBatch === '' || row.batch === selectedBatch)
+    );
+  });
+
+  return (
+    <Container>
+      <Header variant="h5">Students</Header>
+      <Header variant="subtitle1">All Students data</Header>
+      <Grid container spacing={2} alignItems="center">
+        <Grid item>
+          <SearchField
+            label="Search Roll No. / Name"
+            variant="outlined"
+            size="small"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+        </Grid>
+        <Grid item>
+          <FormControl variant="outlined" size="small">
+            <InputLabel>Batch</InputLabel>
+            <Select
+              value={selectedBatch}
+              onChange={(e) => setSelectedBatch(e.target.value)}
+              label="Batch"
+            >
+              <MenuItem value=""><em>None</em></MenuItem>
+              <MenuItem value="Batch C">Batch C</MenuItem>
+              {/* Add more batches as needed */}
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
+      <div style={{ marginTop: '20px' }}>
+        <DataGrid columns={columns} rows={filteredRows} />
+      </div>
+    </Container>
+  );
 }
 
 export default AllStudentsDataGrid;
