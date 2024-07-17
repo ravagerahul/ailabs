@@ -61,10 +61,14 @@ const Students = () => {
     }
 
     setLoading(true);
-
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('batchId', 1);
+    const localStorageData = localStorage.getItem('apiData');
+    const parsedData = JSON.parse(localStorageData); 
+    const codeToFind = selectedBatch[0];  
+    const batch = parsedData.batchList.find(item => item.code === codeToFind);
+    //console.log("batch id ::: " + batch.id);
+    formData.append('batchId', batch.id);
 
     console.log("STARTING HITTING API REQUEST");
     try {

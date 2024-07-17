@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   Typography,
   Divider,
@@ -34,25 +34,32 @@ const MenuProps = {
   },
 };
 
-const batchNames = [
-  "B1",
-  "B2",
-  "B3" // Example batchId, replace with actual batchIds
-  // Other batchIds
-];
+
 
 const UploadTest = () => {
-  const [batchName, setBatchName] = useState([]);
+  const [batchNames, setBatchNames] = useState([]);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedBatch, setSelectedBatch] = useState([]);
+
+  useEffect(() => {
+    const localStorageData = localStorage.getItem('apiData');
+    console.log('LocalStorage apiData:', localStorageData);
+    const parsedData = JSON.parse(localStorageData);
+    if (parsedData && parsedData.batchList) {
+      const sett = parsedData.batchList.map(obj => obj.code);
+      setBatchNames(sett);
+      if (sett.length > 0) {
+        setSelectedBatch([sett[0]]); // Initialize with the first batch if available
+      }
+    }
+  }, []);
 
   const handleChangeBatch = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setBatchName(typeof value === "string" ? value.split(",") : value);
+    const { value } = event.target;
+    setSelectedBatch(Array.isArray(value) ? value : [value]);
   };
 
   const handleFileChange = (event) => {
@@ -74,7 +81,14 @@ const UploadTest = () => {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("batchId", batchName.join(","));
+    const localStorageData = localStorage.getItem('apiData');
+    const parsedData = JSON.parse(localStorageData); 
+    const ids = selectedBatch.map(codeToFind => {
+      const batch = parsedData.batchList.find(item => item.code === codeToFind);
+      return batch ? batch.id : null;
+  });
+  console.log("IDS::::  " + ids)
+    formData.append("batchId", ids.join("-"));
     formData.append("testDate", selectedDate ? selectedDate.toISOString() : "");
 
     try {
@@ -170,7 +184,7 @@ const UploadTest = () => {
                     labelId="demo-multiple-checkbox-label"
                     id="demo-multiple-checkbox"
                     multiple
-                    value={batchName}
+                    value={selectedBatch}
                     onChange={handleChangeBatch}
                     input={<OutlinedInput label="Batches" />}
                     renderValue={(selected) => selected.join(", ")}
@@ -178,7 +192,7 @@ const UploadTest = () => {
                   >
                     {batchNames.map((name) => (
                       <MenuItem key={name} value={name}>
-                        <Checkbox checked={batchName.indexOf(name) > -1} />
+                        <Checkbox checked={batchNames.indexOf(name) > -1} />
                         <ListItemText primary={name} />
                       </MenuItem>
                     ))}

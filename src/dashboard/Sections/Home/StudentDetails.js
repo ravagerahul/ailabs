@@ -1,8 +1,24 @@
 import React from "react";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { useEffect, useState } from 'react';
+
 
 function StudentDetails({ tab }) {
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    fetch('https://theailabs.live/session/api/v1/dashboard/getDashBoardData')
+      .then(response => response.json())
+      .then(data => {
+        setData(data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
+
+  //console.log("data :::" + data.totalStudentCount);
+
   return (
     <>
       {tab == "all" && (
@@ -17,7 +33,7 @@ function StudentDetails({ tab }) {
           <div>
             <div style={{ fontSize: "16px" }}>Total Students</div>
             <div style={{ fontWeight: "700", fontSize: "22px" }}>
-              500
+              {data.totalStudentCount}
               <span
                 style={{
                   fontSize: "12px",
@@ -37,7 +53,7 @@ function StudentDetails({ tab }) {
           <div>
             <div style={{ fontSize: "16px" }}>Questions Processed</div>
             <div style={{ fontWeight: "700", fontSize: "22px" }}>
-              10000
+              {data.totalQuestionsProcessed}
               <span
                 style={{
                   fontSize: "12px",
@@ -57,7 +73,7 @@ function StudentDetails({ tab }) {
           <div>
             <div style={{ fontSize: "16px" }}>Silly Mistake</div>
             <div style={{ fontWeight: "700", fontSize: "22px" }}>
-              83.5
+              {data.avgSillyMistakeScore}
               <span
                 style={{
                   fontSize: "12px",
@@ -77,7 +93,7 @@ function StudentDetails({ tab }) {
           <div>
             <div style={{ fontSize: "16px" }}> Time Management</div>
             <div style={{ fontWeight: "700", fontSize: "22px" }}>
-              73.9{" "}
+              {data.avgTimeManagementScore}{" "}
               <span
                 style={{
                   fontSize: "12px",
@@ -97,7 +113,7 @@ function StudentDetails({ tab }) {
           <div>
             <div style={{ fontSize: "16px" }}> Concentration</div>
             <div style={{ fontWeight: "700", fontSize: "22px" }}>
-              81.2{" "}
+              {data.avgConcentrationScore}{" "}
               <span
                 style={{
                   fontSize: "12px",

@@ -144,7 +144,7 @@ function Home() {
                           marginBottom: "16px",
                         }}
                       >
-                        Student Details
+                        Student Detailsss
                       </div>
                       <StudentDetails tab="all" />
                     </Grid>
