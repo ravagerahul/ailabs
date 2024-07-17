@@ -70,7 +70,7 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
 
-To deploy the App on github use following commands
+### To deploy the App on github use following commands
 
 npm run build   ( If alone this doesn't add the gt-pages branch run below commands also)
 git add -f build
