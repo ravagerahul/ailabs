@@ -50,6 +50,7 @@ export default function SignInCard(props) {
   const [showError, setShowError] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
   const [showSuccess, setShowSuccess] = React.useState(false); // State for success message
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -77,11 +78,17 @@ export default function SignInCard(props) {
       });
 
       if (response.ok) {
+        
         const data = await response.json();
+        const jwt_token = data.jwt_token;
+        localStorage.setItem('jwt_token', jwt_token);
         console.log(data);
         if (data && data.status) {
           const response1 = await fetch("https://theailabs.live/session/api/v1/Meta",{
-            method: 'GET'
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${jwt_token}`
+            }
           });
           const data1 = await response1.json();
           console.log("data from meta   " + data1);
@@ -90,6 +97,7 @@ export default function SignInCard(props) {
           console.log("Data saved in local storage");
           // Successful login logic
           setShowSuccess(true); // Show success message
+          setErrorMessage("Valid credentials")
           setTimeout(() => {
             navigate("/dashboard");
           }, 2000); // Navigate after 2 seconds

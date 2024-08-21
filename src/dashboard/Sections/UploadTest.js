@@ -43,6 +43,7 @@ const UploadTest = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedBatch, setSelectedBatch] = useState([]);
+  const token = localStorage.getItem('jwt_token');
 
   useEffect(() => {
     const localStorageData = localStorage.getItem('apiData');
@@ -98,6 +99,9 @@ const UploadTest = () => {
           method: "POST",
           body: formData,
           credentials: 'include', // to include cookies if needed
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         }
       );
 
@@ -116,6 +120,20 @@ const UploadTest = () => {
   const handleCloseSnackbar = () => {
     setSuccessMessage("");
     window.location.reload();
+  };
+  const downloadSampleStudent = async () => {
+    console.log("starting download");
+    fetch('https://theailabs.live/storage/downloadFile?type=TEST')
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'downloadedFile.pdf'); // Suggested filename
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      });
   };
 
   return (
@@ -171,6 +189,7 @@ const UploadTest = () => {
                     }}
                     variant="outlined"
                     component="label"
+                    onClick={downloadSampleStudent}
                   >
                     Download Sample CSV
                   </Button>

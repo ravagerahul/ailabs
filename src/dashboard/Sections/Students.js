@@ -30,7 +30,7 @@ const Students = () => {
   const [selectedBatch, setSelectedBatch] = useState([]);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-
+  const token = localStorage.getItem('jwt_token');
   useEffect(() => {
     const localStorageData = localStorage.getItem('apiData');
     console.log('LocalStorage apiData:', localStorageData);
@@ -75,6 +75,9 @@ const Students = () => {
       const response = await fetch('https://theailabs.live/storage/uploadStudentList', {
         method: 'POST',
         body: formData,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (!response.ok) {

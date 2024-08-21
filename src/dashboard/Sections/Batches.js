@@ -32,6 +32,8 @@ const Batches = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [showDataGrid, setShowDataGrid] = useState(false);
+  const token = localStorage.getItem('jwt_token');
 
   useEffect(() => {
     const localStorageData = JSON.parse(localStorage.getItem("apiData"));
@@ -44,6 +46,8 @@ const Batches = () => {
       }));
       setRows(batches);
     }
+    setTimeout(() => setShowDataGrid(true), 100); // Add a small delay before rendering DataGrid
+
   }, []);
 
   const handleClickOpen = () => {
@@ -57,18 +61,21 @@ const Batches = () => {
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
-
+  
   const handleSave = async () => {
     setLoading(true);
+    console.log("TOKEN " + token)
     try {
       const response = await fetch(`https://theailabs.live/session/api/v1/configuration/Batch/add?name=${batchName}&code=${batchCode}`, {
         method: "GET",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      const data = await response.json();
-      console.log("Batch added successfully", data);
+      
       setSnackbarMessage("Batch added successfully");
       setSnackbarSeverity("success");
     } catch (error) {
@@ -115,7 +122,7 @@ const Batches = () => {
                 <Grid container spacing={3}></Grid>
               </Grid>
             </Grid>
-            <DataGrid style={{ marginTop: "16px" }} columns={columns} rows={rows} />
+            {showDataGrid && <DataGrid style={{ marginTop: "16px" }} columns={columns} rows={rows} />}
           </div>
         </Paper>
       </Grid>
